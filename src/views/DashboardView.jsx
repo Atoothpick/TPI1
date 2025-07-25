@@ -2,7 +2,7 @@ import React from 'react';
 import { CATEGORIES } from '../constants/materials';
 import { MaterialCategoryCard } from '../components/dashboard/MaterialCategoryCard';
 
-export const DashboardView = ({ inventorySummary, incomingSummary, isEditMode, onSave, onMaterialClick }) => (
+export const DashboardView = ({ inventorySummary, incomingSummary, isEditMode, onSave, onMaterialClick, onAddThickness }) => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {CATEGORIES.map(category => (
             <MaterialCategoryCard
@@ -13,6 +13,7 @@ export const DashboardView = ({ inventorySummary, incomingSummary, isEditMode, o
                 isEditMode={isEditMode}
                 onSave={onSave}
                 onMaterialClick={onMaterialClick}
+                onAddThickness={onAddThickness}
             />
         ))}
     </div>

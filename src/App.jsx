@@ -131,6 +131,9 @@ export default function App() {
                             setScrollToMaterial(materialType);
                         }
                     }}
+                    onAddThickness={(matType) => {
+                        alert(`Add thickness for ${matType}`);
+                    }}
                 />;
             case 'logs':
                 return <LogsView
