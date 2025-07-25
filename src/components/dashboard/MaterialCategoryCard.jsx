@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MATERIAL_TYPES, MATERIALS, STANDARD_LENGTHS } from '../../constants/materials';
 
-export const MaterialCategoryCard = ({ category, inventorySummary, incomingSummary, isEditMode, onSave, onMaterialClick }) => {
+export const MaterialCategoryCard = ({ category, inventorySummary, incomingSummary, isEditMode, onSave, onMaterialClick, onAddThickness }) => {
     const materialsInCategory = MATERIAL_TYPES.filter(m => MATERIALS[m].category === category);
     const [editingCell, setEditingCell] = useState(null); // { matType, len }
     const [editValue, setEditValue] = useState('');
@@ -35,6 +35,7 @@ export const MaterialCategoryCard = ({ category, inventorySummary, incomingSumma
                             {STANDARD_LENGTHS.map(len => (
                                 <th key={len} className="p-2 font-semibold text-center text-slate-400 border-l border-slate-700">{len}"x48"</th>
                             ))}
+                            <th className="p-2 font-semibold text-center text-slate-400 border-l border-slate-700">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,6 +72,11 @@ export const MaterialCategoryCard = ({ category, inventorySummary, incomingSumma
                                         </td>
                                     );
                                 })}
+                                <td className="p-2 text-center border-l border-slate-700">
+                                    <button onClick={() => onAddThickness && onAddThickness(matType)} className="text-blue-400 hover:text-blue-300 underline">
+                                        Add Thickness
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
