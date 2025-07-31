@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { AddStockForm } from '../components/jobs/AddStockForm';
 import { UseStockForm } from '../components/jobs/UseStockForm'; // New import
-import { groupLogsByJob } from '../utils/dataProcessing';
 
 const JobCard = ({ job, onSelectJob, isSelected }) => (
     <div

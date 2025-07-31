@@ -70,7 +70,11 @@ export const PriceHistoryView = ({ inventory, materials, searchQuery }) => {
             costPerPound: `$${item.costPerPound.toFixed(2)}`
         }));
 
-        exportToCSV(dataToExport, `price_history_${selectedCategory.toLowerCase().replace(' ', '_')}.csv`);
+        exportToCSV(
+            dataToExport,
+            headers,
+            `price_history_${selectedCategory.toLowerCase().replace(' ', '_')}.csv`
+        );
     };
 
 
