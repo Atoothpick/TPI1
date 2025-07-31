@@ -1,7 +1,6 @@
 // src/App.jsx
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { writeBatch, runTransaction, doc, collection, deleteDoc, updateDoc } from 'firebase/firestore';
 import Fuse from 'fuse.js';
@@ -27,22 +26,10 @@ import { SearchResultsDropdown } from './components/common/SearchResultsDropdown
 
 // Views
 import { AuthView } from './views/AuthView';
-import { DashboardView } from './views/DashboardView';
-import { LogsView } from './views/LogsView';
-import { MaterialDetailView } from './views/MaterialDetailView';
-import { CostAnalyticsView } from './views/CostAnalyticsView';
-import { PriceHistoryView } from './views/PriceHistoryView';
-import { ReorderView } from './views/ReorderView';
-import { JobOverviewView } from './views/JobOverviewView';
+import { RenderActiveView } from "./RenderActiveView";
+import { ModalManager } from "./ModalManager";
 
 
-// Modals
-import { AddOrderModal } from './components/modals/AddOrderModal';
-import { UseStockModal } from './components/modals/UseStockModal';
-import { EditOutgoingLogModal } from './components/modals/EditOutgoingLogModal';
-import { AddCategoryModal } from './components/modals/AddCategoryModal';
-import { ManageSuppliersModal } from './components/modals/ManageSuppliersModal';
-import { ConfirmationModal } from './components/modals/ConfirmationModal';
 
 
 export default function App() {
@@ -723,89 +710,6 @@ export default function App() {
 
 
 
-    const renderActiveView = () => {
-        switch (activeView) {
-            case 'dashboard':
-                return (
-                    <DndContext
-                        collisionDetection={closestCenter}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
-                        onDragCancel={handleDragCancel}
-                    >
-                        <DashboardView
-                            inventorySummary={inventorySummary}
-                            incomingSummary={incomingSummary}
-                            isEditMode={isEditMode}
-                            materials={materials}
-                            categories={categories}
-                            onSave={handleStockEdit}
-                            onMaterialClick={(materialType) => {
-                                const category = materials[materialType]?.category;
-                                if (category) {
-                                    setActiveView(category);
-                                    setScrollToMaterial(materialType);
-                                }
-                            }}
-                            activeCategory={activeCategory}
-                            onDeleteCategory={handleToggleCategoryForDeletion}
-                            categoriesToDelete={categoriesToDelete}
-                        />
-                    </DndContext>
-                );
-            case 'jobs':
-                return <JobOverviewView
-                    allJobs={allJobs}
-                    inventory={inventory}
-                    usageLog={usageLog}
-                    materials={materials}
-                    suppliers={suppliers}
-                    handleAddOrEditOrder={handleAddOrEditOrder}
-                    handleUseStock={handleUseStock}
-                    initialSelectedJob={selectedJobFromSearch}
-                    onClearSelectedJob={() => setSelectedJobFromSearch(null)}
-                />;
-            case 'logs':
-                return <LogsView
-                    inventory={inventory} usageLog={usageLog} onEditOrder={openModalForEdit}
-                    onDeleteInventoryGroup={handleDeleteInventoryGroup} onDeleteLog={handleDeleteLog}
-                    materials={materials}
-                    onFulfillLog={handleFulfillScheduledLog}
-                    onReceiveOrder={handleReceiveOrder}
-                />;
-            case 'price-history':
-                return <PriceHistoryView
-                    inventory={inventory}
-                    materials={materials}
-                />;
-            case 'analytics':
-                return <CostAnalyticsView
-                    costBySupplier={costBySupplier}
-                    analyticsByCategory={analyticsByCategory}
-                />;
-            case 'reorder':
-                return <ReorderView
-                    inventorySummary={inventorySummary}
-                    materials={materials}
-                    onRestock={handleRestock}
-                />;
-            default:
-                if (initialCategories.includes(activeView)) {
-                    return <MaterialDetailView
-                        category={activeView} inventory={inventory} usageLog={usageLog}
-                        inventorySummary={inventorySummary} incomingSummary={incomingSummary}
-                        materials={materials}
-                        materialTypes={materialTypes}
-                        onDeleteLog={handleDeleteLog} onDeleteInventoryGroup={handleDeleteInventoryGroup}
-                        onEditOrder={openModalForEdit} onReceiveOrder={handleReceiveOrder}
-                        onFulfillLog={handleFulfillScheduledLog}
-                        scrollToMaterial={scrollToMaterial}
-                        onScrollToComplete={onScrollToComplete}
-                    />;
-                }
-                return null;
-        }
-    };
 
     if (!isLoggedIn) {
         return <AuthView onLoginSuccess={() => setIsLoggedIn(true)} />;
@@ -844,7 +748,46 @@ export default function App() {
                 <ViewTabs activeView={activeView} setActiveView={setActiveView} categories={categories} />
                 {error && <ErrorMessage message={error} />}
 
-                {loading ? <LoadingSpinner /> : renderActiveView()}
+                {loading ? (
+                    <LoadingSpinner />
+                ) : (
+                    <RenderActiveView
+                        activeView={activeView}
+                        initialCategories={initialCategories}
+                        inventorySummary={inventorySummary}
+                        incomingSummary={incomingSummary}
+                        isEditMode={isEditMode}
+                        materials={materials}
+                        categories={categories}
+                        handleStockEdit={handleStockEdit}
+                        handleDragStart={handleDragStart}
+                        handleDragEnd={handleDragEnd}
+                        handleDragCancel={handleDragCancel}
+                        activeCategory={activeCategory}
+                        handleToggleCategoryForDeletion={handleToggleCategoryForDeletion}
+                        categoriesToDelete={categoriesToDelete}
+                        allJobs={allJobs}
+                        inventory={inventory}
+                        usageLog={usageLog}
+                        suppliers={suppliers}
+                        handleAddOrEditOrder={handleAddOrEditOrder}
+                        handleUseStock={handleUseStock}
+                        selectedJobFromSearch={selectedJobFromSearch}
+                        setSelectedJobFromSearch={setSelectedJobFromSearch}
+                        openModalForEdit={openModalForEdit}
+                        handleDeleteInventoryGroup={handleDeleteInventoryGroup}
+                        handleDeleteLog={handleDeleteLog}
+                        handleFulfillScheduledLog={handleFulfillScheduledLog}
+                        handleReceiveOrder={handleReceiveOrder}
+                        costBySupplier={costBySupplier}
+                        analyticsByCategory={analyticsByCategory}
+                        handleRestock={handleRestock}
+                        materialTypes={materialTypes}
+                        scrollToMaterial={scrollToMaterial}
+                        onScrollToComplete={onScrollToComplete}
+                        setActiveView={setActiveView}
+                    />
+                )}
 
                 <footer className="text-center text-zinc-500 mt-8 text-sm">
                     <p>TecnoPan Inventory System</p>
@@ -852,21 +795,22 @@ export default function App() {
                 </footer>
             </div>
 
-            {modal.type === 'add' && <AddOrderModal onClose={closeModal} onSave={handleAddOrEditOrder} materialTypes={materialTypes} suppliers={suppliers} preselectedMaterial={modal.data?.preselectedMaterial} />}
-            {modal.type === 'edit-order' && <AddOrderModal onClose={closeModal} onSave={(jobs) => handleAddOrEditOrder(jobs, modal.data)} initialData={modal.data} title="Edit Stock Order" materialTypes={materialTypes} suppliers={suppliers} />}
-            {modal.type === 'use' && <UseStockModal onClose={closeModal} onSave={handleUseStock} inventory={inventory} materialTypes={materialTypes} inventorySummary={inventorySummary} incomingSummary={incomingSummary} suppliers={suppliers} />}
-            {modal.type === 'edit-log' && <EditOutgoingLogModal isOpen={true} onClose={closeModal} logEntry={modal.data} onSave={handleEditOutgoingLog} inventory={inventory} materialTypes={materialTypes} />}
-            {modal.type === 'add-category' && <AddCategoryModal onClose={closeModal} onSave={handleAddCategory} />}
-            {modal.type === 'manage-suppliers' && <ManageSuppliersModal onClose={closeModal} suppliers={suppliers} onAddSupplier={handleAddSupplier} onDeleteSupplier={handleDeleteSupplier} />}
-            {modal.type === 'confirm-delete-categories' &&
-                <ConfirmationModal
-                    isOpen={true}
-                    onClose={closeModal}
-                    onConfirm={handleConfirmDeleteCategories}
-                    title="Confirm Deletion"
-                    message={`Are you sure you want to delete ${modal.data.length} categor${modal.data.length > 1 ? 'ies' : 'y'} and all associated materials/inventory? This action cannot be undone.`}
-                />
-            }
+            <ModalManager
+                modal={modal}
+                closeModal={closeModal}
+                handleAddOrEditOrder={handleAddOrEditOrder}
+                materialTypes={materialTypes}
+                suppliers={suppliers}
+                inventory={inventory}
+                inventorySummary={inventorySummary}
+                incomingSummary={incomingSummary}
+                handleUseStock={handleUseStock}
+                handleEditOutgoingLog={handleEditOutgoingLog}
+                handleAddCategory={handleAddCategory}
+                handleAddSupplier={handleAddSupplier}
+                handleDeleteSupplier={handleDeleteSupplier}
+                handleConfirmDeleteCategories={handleConfirmDeleteCategories}
+            />
         </div>
     );
 }
