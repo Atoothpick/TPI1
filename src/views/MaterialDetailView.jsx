@@ -29,6 +29,7 @@ export const MaterialDetailView = ({
     }, [category, materials, materialTypes, inventorySummary, searchQuery]);
 
     const [orderedMaterials, setOrderedMaterials] = usePersistentState(`material-order-${category}`, []);
+    const displayMaterials = orderedMaterials.length > 0 ? orderedMaterials : initialMaterials;
     const [activeMaterial, setActiveMaterial] = useState(null);
     const [highlightedMaterial, setHighlightedMaterial] = useState(null);
     const detailRefs = useRef({});
@@ -87,8 +88,8 @@ export const MaterialDetailView = ({
             onDragCancel={handleDragCancel}
         >
             <div className="space-y-8">
-                <SortableContext items={initialMaterials} strategy={verticalListSortingStrategy}>
-                    {initialMaterials.map(matType => (
+                <SortableContext items={displayMaterials} strategy={verticalListSortingStrategy}>
+                    {displayMaterials.map(matType => (
                         <MaterialDetailItem
                             key={matType}
                             id={matType}
